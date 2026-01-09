@@ -108,14 +108,14 @@ class AnglePromptEN:
         ],
     }
 
-    CONCAT_MODES = ["prefix", "suffix"]
+    SPLICING_MODES = ["prefix", "suffix"]
     
     @classmethod
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "shot_type": (cls.SHOT_TYPES, {"default": "Close-up"}),
-                "concat_mode": (cls.CONCAT_MODES, {"default": "prefix"}),
+                "camera": (cls.SHOT_TYPES, {"default": "Close-up"}),
+                "splicing": (cls.SPLICING_MODES, {"default": "prefix"}),
             },
             "optional": {
                 "input_prompt": ("STRING", {"forceInput": True}),
@@ -128,26 +128,24 @@ class AnglePromptEN:
     RETURN_TYPES = ("STRING",)
     RETURN_NAMES = ("prompt",)
     FUNCTION = "generate_prompt"
-    CATEGORY = "prompt"
+    CATEGORY = "QwenEditAnglePrompt"
 
     @classmethod
-    def VALIDATE_INPUTS(cls, shot_type, prompt_select=None, **kwargs):
-        # Allow any prompt_select value since it's dynamically generated
+    def VALIDATE_INPUTS(cls, camera, prompt=None, **kwargs):
         return True
 
     @classmethod
-    def IS_CHANGED(cls, shot_type, prompt_select=None, **kwargs):
+    def IS_CHANGED(cls, camera, prompt=None, **kwargs):
         return float("nan")
 
-    def generate_prompt(self, shot_type, concat_mode="prefix", input_prompt=None, unique_id=None, prompt_select=None):
-        # Get prompt from the dynamic widget value
-        if prompt_select is None:
-            prompt_select = self.PROMPTS[shot_type][0]
+    def generate_prompt(self, camera, splicing="prefix", input_prompt=None, unique_id=None, prompt=None):
+        if prompt is None:
+            prompt = self.PROMPTS[camera][0]
         
-        angle_prompt = f"<sks> {prompt_select}"
+        angle_prompt = f"<sks> {prompt}"
         
         if input_prompt:
-            if concat_mode == "prefix":
+            if splicing == "prefix":
                 output = f"{angle_prompt}, {input_prompt}"
             else:
                 output = f"{input_prompt}, {angle_prompt}"
@@ -158,9 +156,9 @@ class AnglePromptEN:
 
 
 NODE_CLASS_MAPPINGS = {
-    "AnglePromptEN": AnglePromptEN
+    "QwenAnglePromptEN": AnglePromptEN
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
-    "AnglePromptEN": "角度提示词_EN"
+    "QwenAnglePromptEN": "QwenAnglePrompt_EN"
 }

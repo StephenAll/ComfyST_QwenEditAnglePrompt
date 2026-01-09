@@ -1,8 +1,8 @@
 import { app } from "../../scripts/app.js";
 
 const NODE_CONFIGS = {
-    "AnglePromptEN": {
-        defaultShotType: "Close-up",
+    "QwenAnglePromptEN": {
+        defaultCamera: "Close-up",
         prompts: {
             "Close-up": [
                 "front view low-angle shot close-up",
@@ -108,8 +108,8 @@ const NODE_CONFIGS = {
             ],
         }
     },
-    "AnglePromptCN": {
-        defaultShotType: "特写镜头组",
+    "QwenAnglePromptCN": {
+        defaultCamera: "特写镜头组",
         prompts: {
             "特写镜头组": [
                 "正面低仰角特写",
@@ -223,35 +223,45 @@ function registerAnglePromptNode(nodeName) {
 
     app.registerExtension({
         name: nodeName,
-        async beforeRegisterNodeDef(nodeType, nodeData, app) {
+        async beforeRegisterNodeDef(nodeType, nodeData) {
             if (nodeData.name !== nodeName) return;
 
             const onNodeCreated = nodeType.prototype.onNodeCreated;
             nodeType.prototype.onNodeCreated = function () {
                 onNodeCreated?.apply(this, arguments);
 
-                const shotTypeWidget = this.widgets.find(w => w.name === "shot_type");
-                const defaultPrompts = config.prompts[config.defaultShotType];
+                const cameraWidget = this.widgets.find(w => w.name === "camera");
+                const splicingWidget = this.widgets.find(w => w.name === "splicing");
+                const defaultPrompts = config.prompts[config.defaultCamera];
                 
-                const promptSelectWidget = this.addWidget(
+                // Find the index of splicing widget to insert prompt before it
+                const splicingIndex = this.widgets.indexOf(splicingWidget);
+                
+                const promptWidget = this.addWidget(
                     "combo",
-                    "prompt_select",
+                    "prompt",
                     defaultPrompts[0],
-                    (value) => {},
+                    () => {},
                     { values: defaultPrompts }
                 );
 
+                // Move prompt widget to be after camera and before splicing
+                if (splicingIndex > 0) {
+                    this.widgets.pop(); // Remove the just added prompt widget from end
+                    this.widgets.splice(splicingIndex, 0, promptWidget); // Insert before splicing
+                }
+
                 const updatePromptOptions = () => {
-                    const shotType = shotTypeWidget.value;
-                    const prompts = config.prompts[shotType] || defaultPrompts;
-                    promptSelectWidget.options.values = prompts;
-                    if (!prompts.includes(promptSelectWidget.value)) {
-                        promptSelectWidget.value = prompts[0];
+                    const camera = cameraWidget.value;
+                    const prompts = config.prompts[camera] || defaultPrompts;
+                    promptWidget.options.values = prompts;
+                    if (!prompts.includes(promptWidget.value)) {
+                        promptWidget.value = prompts[0];
                     }
                 };
 
-                const originalCallback = shotTypeWidget.callback;
-                shotTypeWidget.callback = function (value) {
+                const originalCallback = cameraWidget.callback;
+                cameraWidget.callback = function (value) {
                     originalCallback?.call(this, value);
                     updatePromptOptions();
                 };
@@ -260,16 +270,16 @@ function registerAnglePromptNode(nodeName) {
             };
 
             const onConfigure = nodeType.prototype.onConfigure;
-            nodeType.prototype.onConfigure = function (info) {
+            nodeType.prototype.onConfigure = function () {
                 onConfigure?.apply(this, arguments);
                 
-                const shotTypeWidget = this.widgets.find(w => w.name === "shot_type");
-                const promptSelectWidget = this.widgets.find(w => w.name === "prompt_select");
+                const cameraWidget = this.widgets.find(w => w.name === "camera");
+                const promptWidget = this.widgets.find(w => w.name === "prompt");
                 
-                if (shotTypeWidget && promptSelectWidget) {
-                    const shotType = shotTypeWidget.value;
-                    const prompts = config.prompts[shotType] || config.prompts[config.defaultShotType];
-                    promptSelectWidget.options.values = prompts;
+                if (cameraWidget && promptWidget) {
+                    const camera = cameraWidget.value;
+                    const prompts = config.prompts[camera] || config.prompts[config.defaultCamera];
+                    promptWidget.options.values = prompts;
                 }
             };
         },
