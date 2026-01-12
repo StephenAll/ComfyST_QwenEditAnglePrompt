@@ -1,0 +1,98 @@
+{
+    "QwenAnglePromptEN": {
+        "display_name": "QwenAnglePrompt_EN",
+        "description": "Camera angle prompt node (English) with dynamic prompt selection",
+        "inputs": {
+            "camera": {
+                "name": "Camera",
+                "tooltip": "Select camera shot type"
+            },
+            "splicing": {
+                "name": "Splicing",
+                "tooltip": "Splicing mode: prefix or suffix",
+                "options": {
+                    "prefix": "Prefix",
+                    "suffix": "Suffix"
+                }
+            },
+            "input_prompt": {
+                "name": "Input Prompt",
+                "tooltip": "Optional input prompt to concatenate"
+            }
+        },
+        "outputs": {
+            "0": {
+                "name": "Prompt",
+                "tooltip": "Generated angle prompt"
+            }
+        }
+    },
+    "QwenAnglePromptCN": {
+        "display_name": "QwenAnglePrompt_CN",
+        "description": "Camera angle prompt node (Chinese) with dynamic prompt selection",
+        "inputs": {
+            "camera": {
+                "name": "Camera",
+                "tooltip": "Select camera shot type"
+            },
+            "splicing": {
+                "name": "Splicing",
+                "tooltip": "Splicing mode: prefix or suffix",
+                "options": {
+                    "prefix": "Prefix",
+                    "suffix": "Suffix"
+                }
+            },
+            "input_prompt": {
+                "name": "Input Prompt",
+                "tooltip": "Optional input prompt to concatenate"
+            }
+        },
+        "outputs": {
+            "0": {
+                "name": "Prompt",
+                "tooltip": "Generated angle prompt"
+            }
+        }
+    },
+    "QwenAnglePromptVisual": {
+        "display_name": "QwenAnglePrompt_Visual",
+        "description": "Visual camera angle prompt node with image grid selection",
+        "inputs": {
+            "language": {
+                "name": "Language",
+                "tooltip": "Output prompt language: EN or CN"
+            },
+            "splicing": {
+                "name": "Splicing",
+                "tooltip": "Splicing mode for input prompt",
+                "options": {
+                    "prefix": "Prefix (angle prompts first)",
+                    "suffix": "Suffix (input prompt first)"
+                }
+            },
+            "separator": {
+                "name": "Separator",
+                "tooltip": "Separator between prompts (use \\n for newline, \\t for tab)"
+            },
+            "selected_indices": {
+                "name": "Selected Indices",
+                "tooltip": "Selected image indices (comma separated)"
+            },
+            "input_prompt": {
+                "name": "Input Prompt",
+                "tooltip": "Optional input prompt to concatenate"
+            }
+        },
+        "outputs": {
+            "0": {
+                "name": "Prompt Text",
+                "tooltip": "Multi-line prompt text"
+            },
+            "1": {
+                "name": "Prompt List",
+                "tooltip": "List of selected prompts"
+            }
+        }
+    }
+}

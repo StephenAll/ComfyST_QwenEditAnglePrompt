@@ -1,35 +1,24 @@
 import { app } from "../../scripts/app.js";
 import { IMAGE_DATA } from "./angle_prompt_images.js";
 
-const IMAGE_FILES = [
-    // Close-up (0-31)
-    "closeup_front_low", "closeup_front-right_low", "closeup_right_low", "closeup_back-right_low",
-    "closeup_back_low", "closeup_back-left_low", "closeup_left_low", "closeup_front-left_low",
-    "closeup_front_eye", "closeup_front-right_eye", "closeup_right_eye", "closeup_back-right_eye",
-    "closeup_back_eye", "closeup_back-left_eye", "closeup_left_eye", "closeup_front-left_eye",
-    "closeup_front_elevated", "closeup_front-right_elevated", "closeup_right_elevated", "closeup_back-right_elevated",
-    "closeup_back_elevated", "closeup_back-left_elevated", "closeup_left_elevated", "closeup_front-left_elevated",
-    "closeup_front_high", "closeup_front-right_high", "closeup_right_high", "closeup_back-right_high",
-    "closeup_back_high", "closeup_back-left_high", "closeup_left_high", "closeup_front-left_high",
-    // Medium Shot (32-63)
-    "medium_front_low", "medium_front-right_low", "medium_right_low", "medium_back-right_low",
-    "medium_back_low", "medium_back-left_low", "medium_left_low", "medium_front-left_low",
-    "medium_front_eye", "medium_front-right_eye", "medium_right_eye", "medium_back-right_eye",
-    "medium_back_eye", "medium_back-left_eye", "medium_left_eye", "medium_front-left_eye",
-    "medium_front_elevated", "medium_front-right_elevated", "medium_right_elevated", "medium_back-right_elevated",
-    "medium_back_elevated", "medium_back-left_elevated", "medium_left_elevated", "medium_front-left_elevated",
-    "medium_front_high", "medium_front-right_high", "medium_right_high", "medium_back-right_high",
-    "medium_back_high", "medium_back-left_high", "medium_left_high", "medium_front-left_high",
-    // Wide Shot (64-95)
-    "wide_front_low", "wide_front-right_low", "wide_right_low", "wide_back-right_low",
-    "wide_back_low", "wide_back-left_low", "wide_left_low", "wide_front-left_low",
-    "wide_front_eye", "wide_front-right_eye", "wide_right_eye", "wide_back-right_eye",
-    "wide_back_eye", "wide_back-left_eye", "wide_left_eye", "wide_front-left_eye",
-    "wide_front_elevated", "wide_front-right_elevated", "wide_right_elevated", "wide_back-right_elevated",
-    "wide_back_elevated", "wide_back-left_elevated", "wide_left_elevated", "wide_front-left_elevated",
-    "wide_front_high", "wide_front-right_high", "wide_right_high", "wide_back-right_high",
-    "wide_back_high", "wide_back-left_high", "wide_left_high", "wide_front-left_high",
-];
+function getCurrentLanguage() {
+    return app.ui?.settings?.getSettingValue?.('Comfy.Locale') || 'en';
+}
+
+const UI_LABELS = {
+    en: {
+        groups: ["Close-up", "Medium Shot", "Wide Shot"],
+        selectAll: "Select All",
+        clear: "Clear",
+        selected: "Selected"
+    },
+    zh: {
+        groups: ["特写镜头组", "中景镜头组", "全景镜头组"],
+        selectAll: "全选",
+        clear: "清除",
+        selected: "已选择"
+    }
+};
 
 const PROMPTS_EN = [
     "front view low-angle shot close-up", "front-right quarter view low-angle shot close-up",
@@ -109,10 +98,15 @@ const PROMPTS_CN = [
     "背面高角度俯拍全景", "左后方高角度俯拍全景", "左侧面高角度俯拍全景", "左前方高角度俯拍全景",
 ];
 
-const GROUP_NAMES = {
-    en: ["Close-up", "Medium Shot", "Wide Shot"],
-    cn: ["特写镜头组", "中景镜头组", "全景镜头组"]
-};
+function getLabels() {
+    const lang = getCurrentLanguage();
+    return UI_LABELS[lang] || UI_LABELS.en;
+}
+
+function getTooltipPrompts() {
+    const lang = getCurrentLanguage();
+    return lang === 'zh' ? PROMPTS_CN : PROMPTS_EN;
+}
 
 app.registerExtension({
     name: "QwenAnglePromptVisual",
@@ -128,28 +122,20 @@ app.registerExtension({
             node.imageElements = [];
             node.currentTab = 0;
 
-            // Find widgets
-            const languageWidget = node.widgets.find(w => w.name === "language");
             const selectedIndicesWidget = node.widgets.find(w => w.name === "selected_indices");
-            
-            // Hide the selected_indices widget
-            if (selectedIndicesWidget) {
-                selectedIndicesWidget.type = "hidden";
-                selectedIndicesWidget.computeSize = () => [0, 0];
-            }
+            const labels = getLabels();
+            const tooltipPrompts = getTooltipPrompts();
 
-            // Create container
             const container = document.createElement("div");
-            container.style.cssText = "display:flex; flex-direction:column; gap:8px; padding:8px; background:#1a1a1a; border-radius:4px;";
+            container.style.cssText = "display:flex; flex-direction:column; gap:8px; padding:0; background:#1a1a1a; border-radius:4px;";
 
-            // Tab buttons
             const tabContainer = document.createElement("div");
             tabContainer.style.cssText = "display:flex; gap:4px;";
             
             const tabs = [];
             for (let i = 0; i < 3; i++) {
                 const tab = document.createElement("button");
-                tab.textContent = languageWidget?.value ? GROUP_NAMES.en[i] : GROUP_NAMES.cn[i];
+                tab.textContent = `${labels.groups[i]} (0)`;
                 tab.style.cssText = "flex:1; padding:6px; border:none; border-radius:4px; cursor:pointer; font-size:12px;";
                 tab.style.background = i === 0 ? "#4a9eff" : "#333";
                 tab.style.color = "#fff";
@@ -159,17 +145,16 @@ app.registerExtension({
             }
             container.appendChild(tabContainer);
 
-            // Action buttons
             const actionContainer = document.createElement("div");
             actionContainer.style.cssText = "display:flex; gap:4px;";
             
             const selectAllBtn = document.createElement("button");
-            selectAllBtn.textContent = "Select All";
+            selectAllBtn.textContent = labels.selectAll;
             selectAllBtn.style.cssText = "flex:1; padding:4px; border:none; border-radius:4px; cursor:pointer; background:#555; color:#fff; font-size:11px;";
             selectAllBtn.onclick = () => selectAllInTab();
             
             const clearBtn = document.createElement("button");
-            clearBtn.textContent = "Clear";
+            clearBtn.textContent = labels.clear;
             clearBtn.style.cssText = "flex:1; padding:4px; border:none; border-radius:4px; cursor:pointer; background:#555; color:#fff; font-size:11px;";
             clearBtn.onclick = () => clearSelection();
             
@@ -177,7 +162,6 @@ app.registerExtension({
             actionContainer.appendChild(clearBtn);
             container.appendChild(actionContainer);
 
-            // Image grid
             const gridContainer = document.createElement("div");
             gridContainer.style.cssText = "display:grid; grid-template-columns:repeat(8,1fr); gap:4px;";
 
@@ -190,7 +174,7 @@ app.registerExtension({
                 const img = document.createElement("img");
                 img.src = IMAGE_DATA[i];
                 img.style.cssText = "width:100%; height:100%; object-fit:cover;";
-                img.title = languageWidget?.value ? PROMPTS_EN[i] : PROMPTS_CN[i];
+                img.title = tooltipPrompts[i];
                 img.onerror = () => { img.style.background = "#333"; };
                 
                 wrapper.appendChild(img);
@@ -201,10 +185,9 @@ app.registerExtension({
             }
             container.appendChild(gridContainer);
 
-            // Selection count
             const countLabel = document.createElement("div");
             countLabel.style.cssText = "text-align:center; color:#888; font-size:11px;";
-            countLabel.textContent = "Selected: 0";
+            countLabel.textContent = `${labels.selected}: 0`;
             container.appendChild(countLabel);
 
             // Add DOM widget
@@ -261,26 +244,17 @@ app.registerExtension({
                 if (selectedIndicesWidget) {
                     selectedIndicesWidget.value = indices.join(",");
                 }
-                countLabel.textContent = `Selected: ${indices.length}`;
+                const labels = getLabels();
+                countLabel.textContent = `${labels.selected}: ${indices.length}`;
+                
+                for (let t = 0; t < 3; t++) {
+                    const start = t * 32;
+                    const end = start + 32;
+                    const count = indices.filter(i => i >= start && i < end).length;
+                    tabs[t].textContent = `${labels.groups[t]} (${count})`;
+                }
             }
 
-            // Update tooltips when language changes
-            if (languageWidget) {
-                const originalCallback = languageWidget.callback;
-                languageWidget.callback = function(value) {
-                    originalCallback?.call(this, value);
-                    const prompts = value ? PROMPTS_EN : PROMPTS_CN;
-                    const groupNames = value ? GROUP_NAMES.en : GROUP_NAMES.cn;
-                    node.imageElements.forEach((el, i) => {
-                        el.img.title = prompts[i];
-                    });
-                    tabs.forEach((t, i) => {
-                        t.textContent = groupNames[i];
-                    });
-                };
-            }
-
-            // Restore selection on configure
             node.onConfigure = function(info) {
                 if (info.widgets_values) {
                     const idx = node.widgets.findIndex(w => w.name === "selected_indices");

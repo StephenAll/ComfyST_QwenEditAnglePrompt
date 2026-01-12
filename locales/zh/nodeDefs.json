@@ -1,0 +1,98 @@
+{
+    "QwenAnglePromptEN": {
+        "display_name": "千问角度提示词_EN",
+        "description": "相机角度提示词节点（英文），支持动态提示词选择",
+        "inputs": {
+            "camera": {
+                "name": "镜头",
+                "tooltip": "选择镜头类型"
+            },
+            "splicing": {
+                "name": "拼接模式",
+                "tooltip": "拼接模式：前缀或后缀",
+                "options": {
+                    "prefix": "前缀",
+                    "suffix": "后缀"
+                }
+            },
+            "input_prompt": {
+                "name": "输入提示词",
+                "tooltip": "可选的输入提示词，用于拼接"
+            }
+        },
+        "outputs": {
+            "0": {
+                "name": "提示词",
+                "tooltip": "生成的角度提示词"
+            }
+        }
+    },
+    "QwenAnglePromptCN": {
+        "display_name": "千问角度提示词_CN",
+        "description": "相机角度提示词节点（中文），支持动态提示词选择",
+        "inputs": {
+            "camera": {
+                "name": "镜头",
+                "tooltip": "选择镜头类型"
+            },
+            "splicing": {
+                "name": "拼接模式",
+                "tooltip": "拼接模式：前缀或后缀",
+                "options": {
+                    "prefix": "前缀",
+                    "suffix": "后缀"
+                }
+            },
+            "input_prompt": {
+                "name": "输入提示词",
+                "tooltip": "可选的输入提示词，用于拼接"
+            }
+        },
+        "outputs": {
+            "0": {
+                "name": "提示词",
+                "tooltip": "生成的角度提示词"
+            }
+        }
+    },
+    "QwenAnglePromptVisual": {
+        "display_name": "千问角度提示词_可视化",
+        "description": "可视化相机角度提示词节点，支持图片网格选择",
+        "inputs": {
+            "language": {
+                "name": "语言",
+                "tooltip": "输出提示词语言：英文或中文"
+            },
+            "splicing": {
+                "name": "拼接模式",
+                "tooltip": "输入提示词的拼接模式",
+                "options": {
+                    "prefix": "前缀（角度提示词在前）",
+                    "suffix": "后缀（输入提示词在前）"
+                }
+            },
+            "separator": {
+                "name": "分隔符",
+                "tooltip": "提示词之间的分隔符（使用 \\n 表示换行，\\t 表示制表符）"
+            },
+            "selected_indices": {
+                "name": "已选索引",
+                "tooltip": "已选择的图片索引（逗号分隔）"
+            },
+            "input_prompt": {
+                "name": "输入提示词",
+                "tooltip": "可选的输入提示词，用于拼接"
+            }
+        },
+        "outputs": {
+            "0": {
+                "name": "提示词文本",
+                "tooltip": "多行提示词文本"
+            },
+            "1": {
+                "name": "提示词列表",
+                "tooltip": "已选提示词列表"
+            }
+        }
+    }
+}

@@ -207,13 +207,15 @@ class QwenAnglePromptVisual:
         "左前方高角度俯拍全景",
     ]
 
+    SPLICING_MODES = ["prefix", "suffix"]
+
     @classmethod
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "language": ("BOOLEAN", {"default": True, "label_on": "EN", "label_off": "CN"}),
-                "output_mode": (["multi_line", "string_list"], {"default": "multi_line"}),
-                "selected_indices": ("STRING", {"default": ""}),
+                "splicing": (cls.SPLICING_MODES, {"default": "prefix"}),
+                "separator": ("STRING", {"default": "", "multiline": False}),
+                "selected_indices": ("STRING", {"default": "", "multiline": False}),
             },
             "optional": {
                 "input_prompt": ("STRING", {"forceInput": True}),
@@ -222,6 +224,7 @@ class QwenAnglePromptVisual:
 
     RETURN_TYPES = ("STRING", "STRING")
     RETURN_NAMES = ("prompt_text", "prompt_list")
+    OUTPUT_IS_LIST = (False, True)
     FUNCTION = "generate_prompt"
     CATEGORY = "QwenEditAnglePrompt"
 
@@ -233,28 +236,30 @@ class QwenAnglePromptVisual:
     def IS_CHANGED(cls, **kwargs):
         return float("nan")
 
-    def generate_prompt(self, language, output_mode, selected_indices, input_prompt=None):
+    def generate_prompt(self, splicing, separator, selected_indices, input_prompt=None):
         if not selected_indices or selected_indices.strip() == "":
-            return ("", "")
+            return ("", [])
         
-        prompts = self.PROMPTS_EN if language else self.PROMPTS_CN
+        # 处理转义字符
+        sep = separator.replace("\\n", "\n").replace("\\t", "\t")
+        
+        # 默认输出英文提示词
+        prompts = self.PROMPTS_EN
         
         indices = [int(i.strip()) for i in selected_indices.split(",") if i.strip().isdigit()]
         indices = [i for i in indices if 0 <= i < 96]
         
         selected_prompts = [f"<sks> {prompts[i]}" for i in indices]
         
-        if output_mode == "multi_line":
-            prompt_text = "\n".join(selected_prompts)
-        else:
-            prompt_text = ", ".join(selected_prompts)
-        
-        prompt_list = str(selected_prompts)
+        prompt_text = sep.join(selected_prompts)
         
         if input_prompt:
-            prompt_text = f"{input_prompt}\n{prompt_text}"
+            if splicing == "prefix":
+                prompt_text = f"{prompt_text}{sep}{input_prompt}"
+            else:
+                prompt_text = f"{input_prompt}{sep}{prompt_text}"
         
-        return (prompt_text, prompt_list)
+        return (prompt_text, selected_prompts)
 
 
 NODE_CLASS_MAPPINGS = {
